@@ -1,15 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/njosefbeck/janet.inputsenpai.com/views"
 )
 
-func handlerFunc(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "<h1>Welcome to my awesome site!</h1>")
+var homeView *views.View
+
+func must(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
+func home(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	must(homeView.Render(w, nil))
 }
 
 func main() {
-	http.HandleFunc("/", handlerFunc)
-	http.ListenAndServe(":3000", nil)
+	homeView = views.NewView("layout", "views/home.gohtml")
+
+	r := mux.NewRouter()
+	r.HandleFunc("/", home)
+	http.ListenAndServe(":3000", r)
 }
